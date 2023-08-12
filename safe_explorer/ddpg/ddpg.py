@@ -12,9 +12,10 @@ from safe_explorer.ddpg.models import Critic, Actor
 from safe_explorer.ddpg.utils import Memory
 from safe_explorer.core.tensorboard import TensorBoard
 
+import csv
 
 class DDPGAgent:
-    def __init__(self, state_dim, action_dim):
+    def __init__(self, state_dim, action_dim, ts):
         config = Config.get().ddpg.trainer
         # set attributes
         self.memory_buffer_size = config.memory_buffer_size
@@ -49,8 +50,16 @@ class DDPGAgent:
         self.critic_optimizer = Adam(self.critic.parameters(), lr=self.critic_lr,
                                      weight_decay=self.critic_weight_decay)
         # Tensorboard writer
-        self.writer = TensorBoard.get_writer()
+        self.writerTB = TensorBoard.get_writer()
         self.train_step = 0
+
+        self.ts = ts
+
+        header = ['step', 'actor_loss', 'critic_loss']
+        with open('runs/' + str(self.ts) + '/losses.csv', 'w', encoding='UTF8') as f:
+            writer = csv.writer(f)
+            writer.writerow(header)
+            f.close()
 
     def set_train_mode(self):
         self.actor.train()
@@ -107,6 +116,14 @@ class DDPGAgent:
             target_param.data.copy_(
                 param.data * self.tau + target_param.data * (1.0 - self.tau))
 
-        # self.writer.add_scalar("DDPG/critic loss", critic_loss.item(), self.train_step)
-        # self.writer.add_scalar("DDPG/actor loss", policy_loss.item(), self.train_step)
-        # self.train_step +=1
+
+           
+        data = [ self.train_step, policy_loss.item(), critic_loss.item()]
+        with open('runs/' + str(self.ts) + '/losses.csv', 'a', encoding='UTF8') as f:
+            writer = csv.writer(f)
+            writer.writerow(data)
+            f.close()
+
+        self.writerTB.add_scalar("DDPG/critic loss", critic_loss.item(), self.train_step)
+        self.writerTB.add_scalar("DDPG/actor loss", policy_loss.item(), self.train_step)
+        self.train_step +=1

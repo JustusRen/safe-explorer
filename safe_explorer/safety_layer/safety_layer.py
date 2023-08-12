@@ -42,7 +42,7 @@ class SafetyLayer:
         # init memory
         self.memory = Memory(self.memory_buffer_size)
         # Tensorboard writer
-        self.writer = TensorBoard.get_writer()
+        # self.writer = TensorBoard.get_writer()
         self.train_step = 0
         self.eval_step = 0
 
@@ -151,9 +151,9 @@ class SafetyLayer:
             print(
                 f"Finished epoch {epoch} with average loss: {np.mean(losses, axis=0)}. Running evaluation ...")
             # log training losses to tensorboard
-            for i, loss in enumerate(np.mean(losses, axis=0)):
-                self.writer.add_scalar(
-                    f"constraints/constraint {i}/training loss", loss, self.train_step)
+            #for i, loss in enumerate(np.mean(losses, axis=0)):
+            #    self.writer.add_scalar(
+            #        f"constraints/constraint {i}/training loss", loss, self.train_step)
             self.train_step += 1
 
             # evaluation phase
@@ -166,13 +166,13 @@ class SafetyLayer:
             print(
                 f"Evaluation completed, average loss {np.mean(losses, axis=0)}")
             # log evaluation losses to tensorboard
-            for i, loss in enumerate(np.mean(losses, axis=0)):
-                self.writer.add_scalar(
-                    f"constraints/constraint {i}/eval loss", loss, self.eval_step)
+            #for i, loss in enumerate(np.mean(losses, axis=0)):
+            #    self.writer.add_scalar(
+            #        f"constraints/constraint {i}/eval loss", loss, self.eval_step)
             self.eval_step += 1
             print("----------------------------------------------------------")
 
-        self.writer.close()
+        #self.writer.close()
         print("==========================================================")
         print(
             f"Finished training constraint model. Time spent: {(time.time() - start_time) // 1} secs")
@@ -189,11 +189,12 @@ class SafetyLayer:
         # calculate lagrange multipliers
         multipliers = [torch.clip((torch.dot(
             gi, action) + ci) / torch.dot(gi, gi), min=0) for gi, ci in zip(g, constraints)]
+        multipliers_np = [multiplier.detach().numpy() for multiplier in multipliers]
+
         # Calculate correction; scale correction to be more agressive
-        safe_action = action - np.max(multipliers) * g[np.argmax(multipliers)] * self.correction_scale
+        safe_action = action - np.max(multipliers_np) * g[np.argmax(multipliers_np)] * self.correction_scale
         safe_action = safe_action.data.detach().numpy()
         safe_action = np.clip(safe_action, self.action_low, self.action_high)
-
         return safe_action
 
     # def predict_constraints(self, state, action, constraints):

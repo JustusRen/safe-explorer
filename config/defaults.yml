@@ -53,7 +53,7 @@ arguments:
         help: "DDPG training parameters"
         properties:
           - name: "epochs"
-            default: 300
+            default: 50
           - name: "training_episodes_per_epoch"
             default: 1
           - name: "evaluation_episodes_per_epoch"
@@ -71,7 +71,7 @@ arguments:
           - name: "actor_layers"
             default: [64,64] # [100, 100]
           - name: "critic_layers"
-            default: [256,256] # [500, 500]
+            default: [128,128] # [500, 500]
           - name: "actor_lr"
             default: 0.0001
           - name: "critic_lr"

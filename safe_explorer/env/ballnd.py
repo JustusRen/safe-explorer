@@ -7,6 +7,8 @@ import math
 from safe_explorer.core.config import Config
 from safe_explorer.env.constraintenv import ConstraintEnv
 
+from ltlf2dfa.parser.ltlf import LTLfParser
+from graphviz import Source
 
 class BallND(ConstraintEnv):
     def __init__(self):
@@ -32,6 +34,11 @@ class BallND(ConstraintEnv):
         # rendering viewer
         self.viewer = None
 
+        # guidance
+        self.status = None
+        self.guidance_boundary = None
+        self.dfa_state = 1
+        self.guidance_violations = 0
         # Sets all the episode specific variables
         self.reset()
 
@@ -46,6 +53,11 @@ class BallND(ConstraintEnv):
         self._reset_target_pos()
         self.time = 0.
         self.target_respawn_time = 0.
+        
+        self.guidance_violations = 0
+
+        self._reset_guidance_boundary_pos()
+
         return np.concatenate([self.ball_pos, self.ball_velocity, self._get_noisy_target_pos()])
 
     def _is_ball_out_of_bounds(self):
@@ -60,6 +72,21 @@ class BallND(ConstraintEnv):
             return -1
         else:
             return max(1 - 10 * np.linalg.norm(self.ball_pos - self.target_pos)**2, 0)
+
+    def _reset_guidance_boundary_pos(self):
+        if self.target_pos > self.ball_pos:
+            self.status = 'barrier_left'
+            #self.guidance_boundary = self.ball_pos / 2
+            #self.guidance_boundary = self.ball_pos
+            self.guidance_boundary = self.target_pos - 0.25
+        elif self.target_pos < self.ball_pos:
+            self.status = 'barrier_right'
+            #margin = (1 - self.ball_pos) / 2
+            #self.guidance_boundary = self.ball_pos + margin
+            #self.guidance_boundary = self.ball_pos
+            self.guidance_boundary = self.target_pos + 0.25
+
+
 
     def _reset_target_pos(self):
         self.target_pos = (1 - 2 * self.target_margin) * \
@@ -83,6 +110,7 @@ class BallND(ConstraintEnv):
         # Check if the target needs to be relocated
         if self.target_respawn_time > self.respawn_interval:
             self._reset_target_pos()
+            self._reset_guidance_boundary_pos()
             self.target_respawn_time = 0.
 
     def _get_noisy_target_pos(self):
@@ -240,3 +268,55 @@ class BallND(ConstraintEnv):
         if self.viewer:
             self.viewer.close()
             self.viewer = None
+
+    def get_dfa(self):
+        parser = LTLfParser()
+        guidance_ltl1 = "G((guidance_boundary_violation) -> X move_in_target_direction)"
+        guidance_ltl1 = parser(guidance_ltl1)
+
+        dfa = guidance_ltl1.to_dfa()
+        with open('ballnd1.dot', 'w') as f:
+            f.write(dfa)
+
+        src = Source.from_file('ballnd1.dot')
+        src.render(filename='ballnd1', cleanup=True)
+
+
+
+    def get_dfa_state(self, action):
+
+        #check if agent is within guidance boundary
+        if self.status == 'barrier_left' and self.ball_pos >= self.guidance_boundary:
+            self.dfa_state = 1
+        elif self.status == 'barrier_right' and self.ball_pos <= self.guidance_boundary:
+            self.dfa_state = 1
+
+        # check if outsite guidance barriers and action towards guiidance barriers
+        else:
+            #check if going in the right direction
+            if self.status == 'barrier_left' and action > 0:
+                self.dfa_state = 2
+
+            elif self.status == 'barrier_right' and action < 0:
+                self.dfa_state = 2
+
+            #if not going in the right direction status = 3
+            else:
+                self.dfa_state = 3
+                self.guidance_violations += 1
+
+    # execute this function before taking an action (must happen before safety layer)
+
+    def is_guidance_required(self):
+        if self.dfa_state == 3:
+            return True
+        else:
+            return False
+        
+    def get_guided_action(self, action):
+        action = action*-1
+        self.guidance_violations = 0
+        return action
+    
+    def get_guidance_violations(self): 
+        return self.guidance_violations
