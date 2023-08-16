@@ -18,13 +18,19 @@ class Guide:
         # calculate dfa state
         self._env.get_dfa_state(action)
         
-        """if self._env.is_guidance_required(): 
+
+        # get guided action if guidance is required
+        if self._env.is_guidance_required(): 
             return self._env.get_guided_action(action)
         else:
-            return action"""
+            return action
+        
         #________________________________________________________________________
 
-        #if guidance is required start guiding
+        
+        #difference versions of guidance
+        
+        #guide after 10 violations
         """if self._env.is_guidance_required(): 
             # replace action by a guided action if more than 10 violations in a row (violations are reseted after guidance)
             if self._env.get_guidance_violations() > 10:
@@ -36,7 +42,7 @@ class Guide:
         #________________________________________________________________________
 
         # replace action based on an increasing probability (violations are reseted after guidance)
-        
+        """
         random_number = random.randint(0, 25 - self._env.get_guidance_violations())
         if random_number == 0:
             # print('guided')
@@ -45,6 +51,7 @@ class Guide:
         
         else:
             return action
+        """
         #________________________________________________________________________
         # replace action based on an increasing probability (violations are reseted after guidance)
         

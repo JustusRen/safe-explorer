@@ -74,6 +74,9 @@ class BallND(ConstraintEnv):
             return max(1 - 10 * np.linalg.norm(self.ball_pos - self.target_pos)**2, 0)
 
     def _reset_guidance_boundary_pos(self):
+
+        #different versions to set the guidance boundaries
+
         if self.target_pos > self.ball_pos:
             self.status = 'barrier_left'
             #self.guidance_boundary = self.ball_pos / 2
@@ -282,9 +285,7 @@ class BallND(ConstraintEnv):
         src.render(filename='ballnd1', cleanup=True)
 
 
-
     def get_dfa_state(self, action):
-
         #check if agent is within guidance boundary
         if self.status == 'barrier_left' and self.ball_pos >= self.guidance_boundary:
             self.dfa_state = 1

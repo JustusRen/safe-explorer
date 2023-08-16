@@ -1,6 +1,9 @@
 from ltlf2dfa.parser.ltlf import LTLfParser
 from graphviz import Source
 
+
+# run this script to draw the DFA
+
 parser = LTLfParser()
 formula_str = "G(y -> X z)"
 formula = parser(formula_str)

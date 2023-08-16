@@ -118,21 +118,20 @@ class Trainer:
                     action = noise.get_action(action)
 
                     old_action = action
-                    #print('action before guidance: ', action)
+
+                    # get guided action (comment the next line to test without guidance)
                     action = guide.get_guided_action(action, _)
-                    #print('action after guidance: ', action)
                     if old_action != action:
                         self.train_guidance_counter += 1
                     
                     old_action = action
-                    # print('action before safety: ', action)
 
                     # get safe action
                     if safety_layer:
                         constraints = self.env.get_constraint_values()
                         action = safety_layer.get_safe_action(
                             state, action, constraints)
-                    #print('action after safety: ', action)
+                    
                     if old_action != action:
                         self.train_safety_counter += 1 
 
@@ -169,23 +168,16 @@ class Trainer:
                     # get original policy action
                     action = agent.get_action(state)
                     old_action = action
-                    #print('action before guidance: ', action)
-
-                    # get safe action
-                    # action = guide.get_guided_action(action, _)
-                    #print('action after guidance: ', action)
 
                     if old_action != action:
                         self.eval_guidance_counter += 1
                     
                     old_action = action
-                    #print('action before safety: ', action)
 
                     if safety_layer:
                         constraints = self.env.get_constraint_values()
                         action = safety_layer.get_safe_action(
                             state, action, constraints)
-                    #print('action after safety: ', action)
 
                     if old_action != action:
                         self.eval_safety_counter += 1 
@@ -248,6 +240,6 @@ class Trainer:
 
 
 if __name__ == '__main__':
-
+    # run the training 5 times
     for _ in range(5):
         Trainer().train()
