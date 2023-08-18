@@ -7,7 +7,6 @@ import os
 from safe_explorer.core.config import Config
 from safe_explorer.core.tensorboard import TensorBoard
 from safe_explorer.env.ballnd import BallND
-from safe_explorer.env.spaceship import Spaceship
 from safe_explorer.safety_layer.safety_layer import SafetyLayer
 from safe_explorer.guide.guide import Guide
 from safe_explorer.ddpg.ddpg import DDPGAgent
@@ -25,10 +24,7 @@ class Trainer:
         self.use_safety_layer = config.use_safety_layer
         
         # create environment
-        if config.task == 'ballnd':
-            self.env = BallND()
-        else:
-            self.env = Spaceship()
+        self.env = BallND()
 
         self.train_safety_counter = 0
         self.eval_safety_counter = 0

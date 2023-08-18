@@ -4,25 +4,6 @@ arguments:
   - name: "env"
     help: "Configuration related to simulation environments."
     properties:
-      - name: "spaceship"
-        help: "Spaceship environment configuration."
-        properties:
-          - name: "arena"
-            default: false
-          - name: "agent_slack"
-            default: 0.05
-          - name: "episode_length"
-            default: 15
-          - name: "episode_length_arena"
-            default: 45
-          - name: "time_step"
-            default: 0.1
-          - name: "target_diameter"
-            default: 0.05 # 0.025
-          - name: "enable_reward_shaping"
-            default: false
-          - name: "reward_shaping_margin"
-            default: 0.17     
       - name: "ballnd"
         help: "Ball-ND environment configuration."
         properties:
@@ -69,9 +50,9 @@ arguments:
           - name: "reward_scale"
             default: 1.0
           - name: "actor_layers"
-            default: [64,64] # [100, 100]
+            default: [64,64]
           - name: "critic_layers"
-            default: [128,128] # [500, 500]
+            default: [128,128]
           - name: "actor_lr"
             default: 0.0001
           - name: "critic_lr"
@@ -116,6 +97,6 @@ arguments:
           - name: "seed"
             default: 0
           - name: "task"
-            default: "ballnd" # spaceship; ballnd
+            default: "ballnd"
           - name: "use_safety_layer"
-            default: false
+            default: true

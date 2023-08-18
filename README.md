@@ -1,4 +1,4 @@
-# Implementation of "Safe Exploration in Continuous Action Spaces"
+# Implementation of "Safe Exploration in Continuous Action Spaces" including a guidance component
 
 ## Introduction
 
@@ -6,10 +6,12 @@ This repository contains Pytorch implementation of paper ["Safe Exploration in C
 
 ## Setup
 
-The code was tested with Python 3.7 on Windwos 11. 
+The code was tested with Python 3.7. 
 ```sh
 pip install -r requirements.txt
 ```
+
+To generate a DFA using the script generate_dfa.py or using the function provided in the Ball1D environment, the installation instructions of the following repository have to be used: https://github.com/whitemech/LTLf2DFA.
 
 ## Training
 
